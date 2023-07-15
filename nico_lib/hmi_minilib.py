@@ -21,7 +21,7 @@ class GUI:
         """
         self.hmi_output = np.zeros((480, 640, 3))
 
-        for obj in self.objects:
+        for obj in self.objects[::-1]:
             obj.draw(self.hmi_output)
 
         self._draw_hands()
