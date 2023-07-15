@@ -109,13 +109,13 @@ def main():
                     pred = model.predict(coords_list.reshape(1, 63), verbose=False)
                     for c in range(len(posture_list)):
                         cv2.rectangle(img=img_rgb,
-                                      pt1=(0, img_rgb.shape[0]//len(posture_list) \
+                                      pt1=(0, img_rgb.shape[0]//len(posture_list)
                                            + img_rgb.shape[0]//len(posture_list) * c),
                                       pt2=(int(200 * pred[0, c]), img_rgb.shape[0]//len(posture_list) * c),
                                       color=(int(255 * (1 - pred[0, c])), int(255 * pred[0, c]), 0),
                                       thickness=-1)
                         cv2.rectangle(img=img_rgb,
-                                      pt1=(0, img_rgb.shape[0]//len(posture_list) \
+                                      pt1=(0, img_rgb.shape[0]//len(posture_list)
                                            + img_rgb.shape[0]//len(posture_list) * c),
                                       pt2=(int(200), img_rgb.shape[0]//len(posture_list) * c),
                                       color=(100, 100, 100),
