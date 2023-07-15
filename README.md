@@ -1,22 +1,23 @@
-# Hand posture control
+# Hand posture control for GUI
 
 ## Description
 This package contains all requirements to add new classes, 
-train those classes and use them as control with pynput in respectively 3 python scripts
+train those classes and use them to control a demo graphical user interface to interact with objects.
 
-1. **create_dataset.py** : dataset class registering.
+1. **create_dataset.py** : dataset class registering assisted by a tkinter interface.
 2. **train.py** : Model training and visualizer.
    1. `python3 train.py` without arguments to train/re-train the model before visualizing.
    2. `python3 train.py --no_train` argument to avoid training and use visualizer only.
-3. **Controller.py** : Example controller using the pre-trained model and Mediapipe detection.
+3. **Controller.py** : Example Human Machine Interface using the pre-trained model and Mediapipe detection.
 
-#### Demonstration video
-
-[![Demonstration video](https://i3.ytimg.com/vi/3sla-qnNxwM/maxresdefault.jpg)](https://www.youtube.com/watch?v=3sla-qnNxwM)
+#### Screenshot
+![HMI and cam screenshot](screenshots/HMI_and_cam.png)
 
 ### Default configuration of the controller
-*Up, down, left, right* hand posture with index finger for directional arrows.
-*Thumb and index touching* to press enter
+*Closed hand* to grab an object.
+*pinch* to delete object.
+*index up* to create a ball.
+*thumb up* to create a box.
 
 Existing posture classes are present in [Assets/datasets_records](Assets/datasets_records).
 
@@ -31,8 +32,7 @@ Escape key while focused on OpenCV video output window to end the process by def
 * **Mediapipe** - hand landmarks acquisition.
 * **OpenCV** - low-level image processing and display.
 * **TensorFlow - Keras** - Direct Neural Network for posture prediction.
-* **Pynput** - Keyboard simulation based on predictions.
-* **Tkinter** - User interface.
+* **Tkinter** - User interface for the dataset creation.
 
 ## HandVideoClassifier Class
 
@@ -55,7 +55,7 @@ The labels shown on video can be passed in the `labels_on_vid` optional argument
 ```python
 from nico_lib.hvc_minilib import HandVideoClassifier
 
-hvc = HandVideoClassifier(model_path="Assets/model_data",
+hvc = HandVideoClassifier(model_path="Assets/model_data/model.h5",
                           stream_path=0,  # To use camera at port 0 (default)
                           video_output=True,  # or a list/1D-array of labels
                           verbose=True,  # outputs subprocess behavior to console
@@ -67,7 +67,7 @@ hvc = HandVideoClassifier(model_path="Assets/model_data",
 
 ```python
 from nico_lib.hvc_minilib import HandVideoClassifier
-hvc = HandVideoClassifier("Assets/model_data")
+hvc = HandVideoClassifier("Assets/model_data/model.h5")
 
 hvc.start()  # Begins acquisition subprocess
 ```
@@ -76,7 +76,7 @@ hvc.start()  # Begins acquisition subprocess
 
 ```python
 from nico_lib.hvc_minilib import HandVideoClassifier
-hvc = HandVideoClassifier("Assets/model_data").start()
+hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 prediction = hvc.get_prediction()  # Returns the prediction made on last frame
 ```
@@ -85,7 +85,7 @@ prediction = hvc.get_prediction()  # Returns the prediction made on last frame
 
 ```python
 from nico_lib.hvc_minilib import HandVideoClassifier
-hvc = HandVideoClassifier("Assets/model_data").start()
+hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 state = hvc.is_running()  # Returns the running state of the detection subprocess (bool)
 ```
@@ -94,7 +94,7 @@ state = hvc.is_running()  # Returns the running state of the detection subproces
 
 ```python
 from nico_lib.hvc_minilib import HandVideoClassifier
-hvc = HandVideoClassifier("Assets/model_data").start()
+hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 hvc.stop()
 ```
@@ -103,8 +103,70 @@ hvc.stop()
 
 ```python
 from nico_lib.hvc_minilib import HandVideoClassifier
-hvc = HandVideoClassifier("Assets/model_data").start()
+hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 labels = hvc.labels  # Retrieve the labels passed in argument
 model_path = hvc.model_path  # Retrieve the model path passed in argument
+```
+
+#### Get hands location
+
+```python
+from nico_lib.hvc_minilib import HandVideoClassifier
+hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
+
+hands_coords = hvc.get__hands_coords()
+```
+
+## Element creation and GUI Class
+
+### Element subclasses
+
+#### Box, Ball and Text creation
+
+```python
+import cv2
+from nico_lib.hmi_minilib import GUI, Ball, Box, Text
+
+box = Box(initial_position=[50, 50],
+          box_size=[20, 50],
+          color=(0.3, 0.7, 0.5),
+          can_be_grabbed=True,
+          deletable=True)
+
+ball = Ball(initial_position=[200, 100],
+            ball_radius=10,
+            color=(0.3, 0.7, 0.5),
+            can_be_grabbed=True,
+            deletable=True)
+
+text = Text(initial_position=[300, 200],
+            text="Example text",
+            cv2_font=cv2.FONT_HERSHEY_COMPLEX,
+            font_size=0.8,
+            color=(0.2, 0.3, 0.9),
+            can_by_grabbed=True,
+            deletable=False)
+```
+
+### GUI class usage
+
+#### Initialisation
+
+```python
+from nico_lib.hmi_minilib import GUI
+
+gui = GUI(window_name="Example HMI")
+```
+
+#### Usage in loop
+
+```python
+from nico_lib.hmi_minilib import GUI, Box
+
+gui = GUI(window_name="Example HMI")
+
+
+while True:
+    
 ```

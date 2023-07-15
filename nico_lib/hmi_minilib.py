@@ -1,3 +1,4 @@
+from __future__ import annotations
 import cv2
 import numpy as np
 
@@ -74,7 +75,7 @@ class Element:
                  hit_box_dims: list | tuple = (20, 20),
                  color: tuple | list | np.ndarray = (1, 1, 1),
                  can_by_grabbed: bool = True,
-                 deletable: bool = True):
+                 deletable: bool = True) -> None:
         """
         Base class for GUI object, the draw function needs to be implemented in the subclass.
         :param position: initial position of the object on the GUI.
@@ -131,20 +132,28 @@ class Element:
 
 
 class Ball(Element):
-    def __init__(self, position: list | np.ndarray, ball_radius: int = 30,
-                 color: tuple | list | np.ndarray = (1, 1, 1)):
+    def __init__(self,
+                 initial_position: list | np.ndarray,
+                 ball_radius: int = 30,
+                 color: tuple | list | np.ndarray = (1, 1, 1),
+                 can_be_grabbed: bool = True,
+                 deletable: bool = True) -> None:
         """
         Basic ball based on Element class.
-        :param position: initial position of the object on the GUI.
+        :param initial_position: initial position of the object on the GUI.
         :param ball_radius: ball radius
         :param color: ball color
+        :param can_by_grabbed: condition for the object to be displaced by grabbing it.
+        :param deletable: condition for the object to be deleted.
         """
-        super().__init__(position=position,
+        super().__init__(position=initial_position,
                          color=color,
-                         hit_box_dims=(ball_radius, ball_radius))
+                         hit_box_dims=(ball_radius, ball_radius),
+                         can_by_grabbed=can_be_grabbed,
+                         deletable=deletable)
         self.ball_radius = ball_radius
 
-    def draw(self, src):
+    def draw(self, src) -> None:
         """
         Shows object on GUI, meant to be used into an update function only.
         :param src: image to be drawn to.
@@ -157,21 +166,27 @@ class Ball(Element):
 
 
 class Box(Element):
-    def __init__(self, position: list | np.ndarray,
+    def __init__(self, initial_position: list | np.ndarray,
                  box_size: tuple | list | np.ndarray = (100, 40),
-                 color: tuple | list | np.ndarray = (1, 1, 1)):
+                 color: tuple | list | np.ndarray = (1, 1, 1),
+                 can_be_grabbed: bool = True,
+                 deletable: bool = True) -> None:
         """
         Basic rectangle based on Element class.
-        :param position: initial position of the object on the GUI.
+        :param initial_position: initial position of the object on the GUI.
         :param box_size: box dimensions.
         :param color: rectangle color.
+        :param can_by_grabbed: condition for the object to be displaced by grabbing it.
+        :param deletable: condition for the object to be deleted.
         """
-        super().__init__(position=position,
+        super().__init__(position=initial_position,
                          color=color,
-                         hit_box_dims=[box_size[0] // 2, box_size[1] // 2])
+                         hit_box_dims=[box_size[0] // 2, box_size[1] // 2],
+                         can_be_grabbed=can_be_grabbed,
+                         deletable=deletable)
         self.box_size = box_size
 
-    def draw(self, src):
+    def draw(self, src) -> None:
         """
         Shows object on GUI, meant to be used into an update function only.
         :param src: image to be drawn to.
@@ -185,21 +200,21 @@ class Box(Element):
 
 
 class Text(Element):
-    def __init__(self, position: list | np.ndarray,
+    def __init__(self, initial_position: list | np.ndarray,
                  text: str = "Basic text",
                  cv2_font: int = cv2.FONT_HERSHEY_COMPLEX_SMALL,
                  font_size: int | float = 1,
                  color: tuple | list | np.ndarray = (1, 1, 1),
                  can_by_grabbed: bool = True,
-                 deletable: bool = True):
+                 deletable: bool = True) -> None:
         """
         Basic text based on Element class.
-        :param position: initial position of the object on the GUI.
+        :param initial_position: initial position of the object on the GUI.
         :param text: displayed text.
         :param font_size: font size.
         :param color: rectangle color.
         """
-        super().__init__(position=position,
+        super().__init__(position=initial_position,
                          color=color,
                          hit_box_dims=[font_size*len(text)*7, font_size*20],
                          can_by_grabbed=can_by_grabbed,
@@ -208,7 +223,7 @@ class Text(Element):
         self.font_size = font_size
         self.font = cv2_font
 
-    def draw(self, src):
+    def draw(self, src) -> None:
         """
         Shows object on GUI, meant to be used into an update function only.
         :param src: image to be drawn to.
