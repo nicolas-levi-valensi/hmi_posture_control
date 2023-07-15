@@ -56,19 +56,27 @@ def create_base_scene(gui_handler: GUI) -> None:
                   deletable=False)
     gui_handler.add_object(text_1)
 
-    text_1 = Text(initial_position=[100, 40],
+    text_2 = Text(initial_position=[130, 40],
                   text="Pinch to delete",
                   font_size=1,
                   color=(0.9, 0.9, 0.4),
                   deletable=False)
-    gui_handler.add_object(text_1)
+    gui_handler.add_object(text_2)
 
-    text_1 = Text(initial_position=[150, 120],
+    text_3 = Text(initial_position=[150, 120],
                   text="Grab to displace",
                   font_size=1,
                   color=(0.9, 0.5, 0.5),
                   deletable=False)
-    gui_handler.add_object(text_1)
+    gui_handler.add_object(text_3)
+
+    text_4 = Text(initial_position=[350, 220],
+                  text="Fixed text",
+                  font_size=1,
+                  color=(0.9, 0.5, 0.5),
+                  deletable=False,
+                  can_be_grabbed=False)
+    gui_handler.add_object(text_4)
 
 
 def main() -> None:
@@ -97,7 +105,6 @@ def main() -> None:
                 if (np.less(np.abs(np.subtract(obj.get_position(), hand_pos)), obj.get_hit_box())).all() \
                         and states[hand_id] == GRAB_INDEX and prev_states[hand_id] != GRAB_INDEX:
                     obj.set_grabbed(grabbed=True, holder_index=hand_id)
-                    obj.set_position(position=hand_pos)
                     held = True
                 elif obj.is_grabbed() and hand_id == obj.grabbed_by and states[hand_id] == GRAB_INDEX:
                     obj.set_position(position=hand_pos)
