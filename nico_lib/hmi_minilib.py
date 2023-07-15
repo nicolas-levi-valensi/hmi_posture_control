@@ -92,13 +92,6 @@ class Element:
         self.grabbed = False
         self.grabbed_by = 0
 
-    def get_hit_box(self) -> (tuple | list):
-        """
-        Returns the dimensions of the object interaction hit box.
-        :return: [x, y] distance from center.
-        """
-        return self.hit_box
-
     def set_position(self, position: list | np.ndarray) -> None:
         """
         Overwrites the position of the object.
@@ -129,6 +122,13 @@ class Element:
         :return: grabbed state of the object.
         """
         return self.grabbed
+
+    def get_hit_box(self) -> (tuple | list):
+        """
+        Returns the dimensions of the object interaction hit box.
+        :return: [x, y] distance from center.
+        """
+        return self.hit_box
 
 
 class Ball(Element):

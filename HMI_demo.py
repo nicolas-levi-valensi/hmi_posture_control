@@ -86,7 +86,7 @@ def main() -> None:
 
     prev_states = [-1, -1]  # Stores the previous hand states to detect changes in hands postures
     while hvc.is_running():  # Mainloop tests and actions
-        states = hvc.get_prediction()
+        states = hvc.get_predictions()
         hands_coords = hvc.get__hands_coords()
         hmi.set_hands_coords(hands_coords)
 

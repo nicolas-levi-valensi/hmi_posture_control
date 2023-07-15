@@ -148,7 +148,7 @@ class HandVideoClassifier:
         self.__stream.release()
         self.stop()
 
-    def get_prediction(self) -> tuple:
+    def get_predictions(self) -> tuple:
         """
         Returns the argmax of the classifier output for both hands
 

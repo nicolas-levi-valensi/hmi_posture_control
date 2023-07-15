@@ -76,9 +76,10 @@ hvc.start()  # Begins acquisition subprocess
 
 ```python
 from nico_lib.hvc_minilib import HandVideoClassifier
+
 hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
-prediction = hvc.get_prediction()  # Returns the prediction made on last frame
+prediction = hvc.get_predictions()  # Returns the prediction made on last frame
 ```
 
 #### Get running state
@@ -120,13 +121,13 @@ hands_coords = hvc.get__hands_coords()
 
 ## Element creation and GUI Class
 
-### Element subclasses
+### Element subclasses usage
 
 #### Box, Ball and Text creation
 
 ```python
+from nico_lib.hmi_minilib import Ball, Box, Text
 import cv2
-from nico_lib.hmi_minilib import GUI, Ball, Box, Text
 
 box = Box(initial_position=[50, 50],
           box_size=[20, 50],
@@ -149,6 +150,66 @@ text = Text(initial_position=[300, 200],
             deletable=False)
 ```
 
+#### Set the position of the object on GUI
+
+```python
+from nico_lib.hmi_minilib import Ball
+
+ball = Ball(initial_position=[40, 30])
+
+# ACTIONS ...
+
+ball.set_position(position=[20, 10])
+```
+
+#### Get the position of the object on GUI
+
+```python
+from nico_lib.hmi_minilib import Box
+
+box = Box(initial_position=[40, 30])
+
+# ACTIONS ...
+
+actual_position = box.get_position()
+```
+
+#### Set the state of the object to grabbed
+
+```python
+from nico_lib.hmi_minilib import Text
+
+text = Text(initial_position=[40, 30])
+
+# ACTIONS ...
+
+text.set_grabbed(grabbed=True, holder_index=1)  # holder hand index accessible through Element.grabbed_by
+```
+
+#### Check the grabbed state of the object
+
+```python
+from nico_lib.hmi_minilib import Ball
+
+ball = Ball(initial_position=[40, 30])
+
+# ACTIONS ...
+
+is_grabbed = ball.is_grabbed()
+```
+
+#### Get hit box (for grab, and delete)
+
+```python
+from nico_lib.hmi_minilib import Ball
+
+ball = Ball(initial_position=[40, 30])
+
+# ACTIONS ...
+
+hit_box = ball.get_hit_box()
+```
+
 ### GUI class usage
 
 #### Initialisation
@@ -159,14 +220,27 @@ from nico_lib.hmi_minilib import GUI
 gui = GUI(window_name="Example HMI")
 ```
 
-#### Usage in loop
+#### Usage in loop with HandVideoClassifier
 
 ```python
 from nico_lib.hmi_minilib import GUI, Box
+from nico_lib.hvc_minilib import HandVideoClassifier
+import cv2
 
 gui = GUI(window_name="Example HMI")
+hvc = HandVideoClassifier(model_path="Assets/model_data/model.h5")
 
+box = Box(initial_position=[50, 80])
+gui.add_object(box)
 
 while True:
-    
+    hands_predictions = hvc.get_predictions()
+    hands_positions = hvc.get__hands_coords()
+    gui.set_hands_coords(hands_positions)
+   
+    # ACTIONS ...
+   
+    gui.draw()
+    if cv2.waitKey(1) == 27:  # Escape KeyCode is 27
+        break
 ```
