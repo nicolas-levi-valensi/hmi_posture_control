@@ -1,48 +1,63 @@
 from __future__ import annotations
+
+import os
 import signal
 import numpy as np
 import cv2
 from nico_lib.hvc_minilib import HandVideoClassifier
-from nico_lib.hmi_minilib import Ball, Box, HMI
+from nico_lib.hmi_minilib import Ball, Box, GUI
 
 # SETTINGS
 MODEL_PATH = "Assets/model_data/model.h5"  # TensorFlow Keras model path root
-MODEL_OUTPUT_LABELS = ["dummy", "down", "left", "dummy", "dummy", "pinch", "right", "dummy", "dummy", "dummy", "up"]
+DATA_PATH = "Assets/datasets_records"
+MODEL_OUTPUT_LABELS = [class_file[:-4] for class_file in os.listdir(DATA_PATH)]
 KEY_PRESS_DELAY = 0.2  # Delay between each press on [up, down, left, right] key
 USE_VERBOSE_ON_HVC = True  # Enables INFO output from HandVideoClassifier
+VIDEO_OUTPUT = True
 
-MAX_DIST_TO_GRAB = 20
 GRAB_INDEX = 0
 ADD_BALL_INDEX = 10
 ADD_BOX_INDEX = 9
 DEL_INDEX = 5
 
 
-def main():
-    hvc = HandVideoClassifier(model_path=MODEL_PATH, stream_path=0, video_output=False,
-                              labels_on_vid=MODEL_OUTPUT_LABELS, verbose=USE_VERBOSE_ON_HVC).start()
+def create_base_scene(gui_handler) -> None:
+    """
 
-    hmi = HMI(window_name="Interface")
-
-    signal.signal(signal.SIGINT, hvc.stop)
-
+    :param gui_handler:
+    """
+    # Scene initialisation (example)
     box_0 = Box(position=[200, 200],
                 box_size=[40, 30],
-                color=(100, 200, 0))
-    hmi.add_object(box_0)
+                color=(0.1, 0.8, 0))
+    gui_handler.add_object(box_0)
 
     box_1 = Box(position=[300, 100],
                 box_size=[80, 60],
-                color=(0, 100, 250))
-    hmi.add_object(box_1)
+                color=(0, 0.3, 0.7))
+    gui_handler.add_object(box_1)
 
     ball_0 = Ball(position=[50, 400],
                   ball_radius=30,
-                  color=(255, 0, 100))
-    hmi.add_object(ball_0)
+                  color=(0.1, 0.2, 0.3))
+    gui_handler.add_object(ball_0)
 
-    prev_states = [-1, -1]
-    while hvc.is_running():
+
+def main() -> None:
+    # Video capture and detection initialisation
+    hvc = HandVideoClassifier(model_path=MODEL_PATH, stream_path=0, video_output=VIDEO_OUTPUT,
+                              labels_on_vid=MODEL_OUTPUT_LABELS, verbose=USE_VERBOSE_ON_HVC).start()
+
+    # Graphic interface initialisation
+    hmi = GUI(window_name="Interface")
+
+    # Ctrl-C handling for clean subprocess shutdown
+    signal.signal(signal.SIGINT, hvc.stop)
+
+    create_base_scene(gui_handler=hmi)
+
+    prev_states = [-1, -1]  # Stores the previous hand states to detect changes in hands postures
+    while hvc.is_running():  # Mainloop tests and actions
         states = hvc.get_prediction()
         hands_coords = hvc.get__hands_coords()
         hmi.set_hands_coords(hands_coords)
@@ -64,6 +79,7 @@ def main():
                 elif held:
                     break
 
+        # Object deletion
         for hand_pos, hand_id in zip(hands_coords, range(2)):
             for obj, obj_id in zip(hmi.objects, range(len(hmi.objects))):
                 if (np.less(np.abs(np.subtract(obj.get_position(), hand_pos)), obj.get_hit_box())).all() \

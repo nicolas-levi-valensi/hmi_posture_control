@@ -2,26 +2,31 @@ import cv2
 import numpy as np
 
 
-class HMI:
+class GUI:
     def __init__(self,
-                 window_name: str = "HMI"):
+                 window_name: str = "HMI") -> None:
         self.window_name = window_name
         self.objects = []
-        self.hmi_output = np.zeros((480, 640, 3), dtype=np.uint8)
-        self.hand_coords = [[0, 0],
-                            [0, 0]]
+        self.hmi_output = np.zeros((480, 640, 3))
+        self.hand_coords = [[0, 0], [0, 0]]
 
-    def draw(self):
+    def draw(self) -> None:
+        """
+        Output image generation, used to update the scene.
+        """
         self.hmi_output = np.zeros((480, 640, 3))
 
         for obj in self.objects:
             obj.draw(self.hmi_output)
 
-        self.draw_hands()
+        self._draw_hands()
 
         cv2.imshow("HMI", self.hmi_output)
 
-    def draw_hands(self):
+    def _draw_hands(self) -> None:
+        """
+        Hands positions drawing.
+        """
         cv2.circle(self.hmi_output,
                    center=self.hand_coords[0],
                    radius=10,
@@ -36,13 +41,25 @@ class HMI:
                    thickness=3,
                    lineType=cv2.LINE_4)
 
-    def set_hands_coords(self, coords):
+    def set_hands_coords(self, coords: list) -> None:
+        """
+        Update the hand coordinates to control GUI.
+        :param coords: 2x2 list of hand coordinates based on image shape.
+        """
         self.hand_coords = coords
 
-    def add_object(self, obj):
+    def add_object(self, obj) -> None:
+        """
+        Append object passed in argument into the drawing list.
+        :param obj: Object to append to list.
+        """
         self.objects.append(obj)
 
     def delete_object(self, obj_id) -> None:
+        """
+        Deletes object from GUI.
+        :param obj_id: Index of the object to delete in object list.
+        """
         self.objects.pop(obj_id)
 
 
@@ -60,20 +77,41 @@ class Element:
         self.grabbed_by = 0
 
     def get_hit_box(self) -> (tuple | list):
+        """
+        Returns the dimensions of the object interaction hit box.
+        :return: [x, y] distance from center.
+        """
         return self.hit_box
 
-    def set_position(self, position: list | np.ndarray):
+    def set_position(self, position: list | np.ndarray) -> None:
+        """
+        Overwrites the position of the object.
+        :param position: [x, y] coordinates in the GUI.
+        """
         self.position = position
 
     def get_position(self) -> list:
+        """
+        Get the position of the object into the GUI coordinates.
+        :return: position of the object.
+        """
         return self.position
 
     def set_grabbed(self, grabbed: bool, holder_index: int = 0):
+        """
+        Set the grabbed state and the holder index of the object.
+        :param grabbed: grabbed bool for state.
+        :param holder_index: holder index
+        """
         if self.can_by_grabbed:
             self.grabbed = grabbed
             self.grabbed_by = holder_index
 
-    def is_grabbed(self):
+    def is_grabbed(self) -> bool:
+        """
+        Returns the state of the object.
+        :return: grabbed state of the object.
+        """
         return self.grabbed
 
 
@@ -86,6 +124,10 @@ class Ball(Element):
         self.ball_radius = ball_radius
 
     def draw(self, src):
+        """
+        Shows object on GUI, meant to be used into an update function only.
+        :param src: image to be drawn to.
+        """
         cv2.circle(src,
                    center=self.position,
                    radius=self.ball_radius,
@@ -103,9 +145,17 @@ class Box(Element):
         self.box_size = box_size
 
     def draw(self, src):
+        """
+        Shows object on GUI, meant to be used into an update function only.
+        :param src: image to be drawn to.
+        """
         cv2.rectangle(src,
                       pt1=(self.position[0] - self.box_size[0] // 2, self.position[1] - self.box_size[1] // 2),
                       pt2=(self.position[0] + self.box_size[0] // 2, self.position[1] + self.box_size[1] // 2),
                       color=self.color,
                       thickness=-1,
                       lineType=cv2.LINE_4)
+
+
+if __name__ == '__main__':
+    pass

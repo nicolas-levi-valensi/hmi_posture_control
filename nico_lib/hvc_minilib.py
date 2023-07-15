@@ -1,8 +1,12 @@
+import os
+import time
 from multiprocessing import Process, Value
 import numpy as np
 import cv2
 import mediapipe as mp
 from keras import models
+
+MODEL_PATH = "../Assets/model_data/model.h5"  # TensorFlow Keras model path
 
 
 class HandVideoClassifier:
@@ -77,10 +81,11 @@ class HandVideoClassifier:
         else:
             self.__stream = cv2.VideoCapture(self.__stream_path)
 
-        if labels is not None and model.layers[-1].output_shape[1] == len(labels):
-            self.labels = labels
-        else:
-            raise ValueError("The labels list must be of length {0}".format((model.layers[-1]).output_shape[1]))
+        if labels is not None:
+            if model.layers[-1].output_shape[1] == len(labels):
+                self.labels = labels
+            else:
+                raise ValueError("The labels list must be of length {0}".format((model.layers[-1]).output_shape[1]))
 
         # Allowing main process to continue and finishing startup.
         self._set_running()
@@ -109,13 +114,13 @@ class HandVideoClassifier:
                     pred_right = model.predict(coords_list[1, :, :].reshape(1, 63), verbose=False)
                     self.__prediction_right.value = np.argmax(pred_right)
 
-                    self.left_center_coords_x.value = int(results.multi_hand_landmarks[0].landmark[9].x \
+                    self.left_center_coords_x.value = int(results.multi_hand_landmarks[0].landmark[9].x
                                                           * rgb_src.shape[1])
-                    self.left_center_coords_y.value = int(results.multi_hand_landmarks[0].landmark[9].y \
+                    self.left_center_coords_y.value = int(results.multi_hand_landmarks[0].landmark[9].y
                                                           * rgb_src.shape[0])
-                    self.right_center_coords_x.value = int(results.multi_hand_landmarks[1].landmark[9].x \
+                    self.right_center_coords_x.value = int(results.multi_hand_landmarks[1].landmark[9].x
                                                            * rgb_src.shape[1])
-                    self.right_center_coords_y.value = int(results.multi_hand_landmarks[1].landmark[9].y \
+                    self.right_center_coords_y.value = int(results.multi_hand_landmarks[1].landmark[9].y
                                                            * rgb_src.shape[0])
                 else:
                     self.__prediction_left.value = -1
@@ -137,7 +142,10 @@ class HandVideoClassifier:
                     if self.always_on_top:
                         cv2.setWindowProperty("Video Output", cv2.WND_PROP_TOPMOST, 1)
                     if cv2.waitKey(1) & 0xFF == 27:
-                        self.stop()
+                        break
+
+        self.__stream.release()
+        self.stop()
 
     def get_prediction(self) -> tuple:
         """
@@ -177,7 +185,6 @@ class HandVideoClassifier:
         self.__running.value = 0
 
         if self.__video_output:
-            self.__stream.release()
             cv2.destroyAllWindows()
 
         if self.__verbose:
@@ -191,4 +198,16 @@ class HandVideoClassifier:
 
 
 if __name__ == '__main__':
-    pass
+    print("HVC MINILIB SCRIPT EXECUTED \n"
+          "(this script is made only for test purposes and does not provide any functionalities)")
+    if os.path.isfile(MODEL_PATH):
+        hvc = HandVideoClassifier(model_path=MODEL_PATH,
+                                  stream_path=0,
+                                  video_output=True,
+                                  verbose=True,
+                                  labels_on_vid=None,
+                                  always_on_top=False).start()
+        time.sleep(5)
+        hvc.stop()
+    else:
+        raise FileExistsError(f"{MODEL_PATH} is not a valid file path for model.")
