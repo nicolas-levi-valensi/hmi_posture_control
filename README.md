@@ -146,7 +146,7 @@ text = Text(initial_position=[300, 200],
             cv2_font=cv2.FONT_HERSHEY_COMPLEX,
             font_size=0.8,
             color=(0.2, 0.3, 0.9),
-            can_by_grabbed=True,
+            can_be_grabbed=True,
             deletable=False)
 ```
 

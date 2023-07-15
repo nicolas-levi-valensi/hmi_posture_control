@@ -74,20 +74,20 @@ class Element:
                  position: list | np.ndarray,
                  hit_box_dims: list | tuple = (20, 20),
                  color: tuple | list | np.ndarray = (1, 1, 1),
-                 can_by_grabbed: bool = True,
+                 can_be_grabbed: bool = True,
                  deletable: bool = True) -> None:
         """
         Base class for GUI object, the draw function needs to be implemented in the subclass.
         :param position: initial position of the object on the GUI.
         :param hit_box_dims: [x, y] distance from center.
         :param color: object color.
-        :param can_by_grabbed: condition for the object to be displaced by grabbing it.
+        :param can_be_grabbed: condition for the object to be displaced by grabbing it.
         :param deletable: condition for the object to be deleted.
         """
         self.hit_box = hit_box_dims
         self.position = position
         self.color = color
-        self.can_by_grabbed = can_by_grabbed
+        self.can_by_grabbed = can_be_grabbed
         self.deletable = deletable
         self.grabbed = False
         self.grabbed_by = 0
@@ -143,13 +143,13 @@ class Ball(Element):
         :param initial_position: initial position of the object on the GUI.
         :param ball_radius: ball radius
         :param color: ball color
-        :param can_by_grabbed: condition for the object to be displaced by grabbing it.
+        :param can_be_grabbed: condition for the object to be displaced by grabbing it.
         :param deletable: condition for the object to be deleted.
         """
         super().__init__(position=initial_position,
                          color=color,
                          hit_box_dims=(ball_radius, ball_radius),
-                         can_by_grabbed=can_be_grabbed,
+                         can_be_grabbed=can_be_grabbed,
                          deletable=deletable)
         self.ball_radius = ball_radius
 
@@ -176,7 +176,7 @@ class Box(Element):
         :param initial_position: initial position of the object on the GUI.
         :param box_size: box dimensions.
         :param color: rectangle color.
-        :param can_by_grabbed: condition for the object to be displaced by grabbing it.
+        :param can_be_grabbed: condition for the object to be displaced by grabbing it.
         :param deletable: condition for the object to be deleted.
         """
         super().__init__(position=initial_position,
@@ -205,7 +205,7 @@ class Text(Element):
                  cv2_font: int = cv2.FONT_HERSHEY_COMPLEX_SMALL,
                  font_size: int | float = 1,
                  color: tuple | list | np.ndarray = (1, 1, 1),
-                 can_by_grabbed: bool = True,
+                 can_be_grabbed: bool = True,
                  deletable: bool = True) -> None:
         """
         Basic text based on Element class.
@@ -217,7 +217,7 @@ class Text(Element):
         super().__init__(position=initial_position,
                          color=color,
                          hit_box_dims=[font_size*len(text)*7, font_size*20],
-                         can_by_grabbed=can_by_grabbed,
+                         can_be_grabbed=can_be_grabbed,
                          deletable=deletable)
         self.text = text
         self.font_size = font_size
