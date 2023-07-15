@@ -1,11 +1,10 @@
 from __future__ import annotations
-
 import os
 import signal
 import numpy as np
 import cv2
 from nico_lib.hvc_minilib import HandVideoClassifier
-from nico_lib.hmi_minilib import Ball, Box, GUI
+from nico_lib.hmi_minilib import Ball, Box, GUI, Text
 
 # SETTINGS
 MODEL_PATH = "Assets/model_data/model.h5"  # TensorFlow Keras model path root
@@ -21,10 +20,11 @@ ADD_BOX_INDEX = 9
 DEL_INDEX = 5
 
 
-def create_base_scene(gui_handler) -> None:
+def create_base_scene(gui_handler: GUI) -> None:
     """
-
-    :param gui_handler:
+    Base scene example to generate a few object.
+    :param gui_handler: GUI object from hmi_minilib
+    :type gui_handler: GUI
     """
     # Scene initialisation (example)
     box_0 = Box(position=[200, 200],
@@ -37,10 +37,38 @@ def create_base_scene(gui_handler) -> None:
                 color=(0, 0.3, 0.7))
     gui_handler.add_object(box_1)
 
-    ball_0 = Ball(position=[50, 400],
+    ball_0 = Ball(position=[400, 400],
                   ball_radius=30,
                   color=(0.1, 0.2, 0.3))
     gui_handler.add_object(ball_0)
+
+    text_0 = Text(position=[300, 60],
+                  text="Deletable text",
+                  font_size=1,
+                  color=(0.8, 0.2, 0.8),
+                  deletable=True)
+    gui_handler.add_object(text_0)
+
+    text_1 = Text(position=[200, 360],
+                  text="Not deletable",
+                  font_size=1,
+                  color=(0.4, 0.2, 0.9),
+                  deletable=False)
+    gui_handler.add_object(text_1)
+
+    text_1 = Text(position=[100, 40],
+                  text="Pinch to delete",
+                  font_size=1,
+                  color=(0.9, 0.9, 0.4),
+                  deletable=False)
+    gui_handler.add_object(text_1)
+
+    text_1 = Text(position=[150, 120],
+                  text="Grab to displace",
+                  font_size=1,
+                  color=(0.9, 0.5, 0.5),
+                  deletable=False)
+    gui_handler.add_object(text_1)
 
 
 def main() -> None:
