@@ -6,16 +6,18 @@ from keras import layers, models
 import mediapipe as mp
 import argparse
 
+MODEL_PATH = "Assets/model_data/model.h5"
+
 
 def create_model(n_classes):
     model = models.Sequential([
         layers.Dense(63, activation='relu', input_shape=(63,)),
         layers.Dropout(0.2),
-        layers.Dense(300, activation='relu', input_shape=(300,)),
+        layers.Dense(128, activation='relu', input_shape=(128,)),
         layers.Dropout(0.2),
-        layers.Dense(500, activation='relu', input_shape=(500,)),
+        layers.Dense(256, activation='relu', input_shape=(256,)),
         layers.Dropout(0.2),
-        layers.Dense(300, activation='relu', input_shape=(300,)),
+        layers.Dense(128, activation='relu', input_shape=(128,)),
         layers.Dropout(0.2),
         layers.Dense(n_classes, activation="softmax")
     ])
@@ -46,7 +48,7 @@ def main():
 
     data_path = "Assets/datasets_records"
     train_model = not args.no_train
-    model_path = "Assets/model_data/model.h5"
+    model_path = MODEL_PATH
 
     files_names = [class_file for class_file in os.listdir(data_path)]
 
