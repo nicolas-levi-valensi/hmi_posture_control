@@ -158,11 +158,18 @@ class Ball(Element):
         Shows object on GUI, meant to be used into an update function only.
         :param src: image to be drawn to.
         """
-        cv2.circle(src,
-                   center=self.position,
-                   radius=self.ball_radius,
-                   color=tuple(self.color),
-                   thickness=-1)
+        if not self.grabbed:
+            cv2.circle(src,
+                       center=self.position,
+                       radius=self.ball_radius,
+                       color=self.color,
+                       thickness=-1)
+        else:
+            cv2.circle(src,
+                       center=self.position,
+                       radius=int(1.2 * self.ball_radius),
+                       color=[c / 2 for c in self.color],
+                       thickness=-1)
 
 
 class Box(Element):
@@ -191,12 +198,20 @@ class Box(Element):
         Shows object on GUI, meant to be used into an update function only.
         :param src: image to be drawn to.
         """
-        cv2.rectangle(src,
-                      pt1=(self.position[0] - self.box_size[0] // 2, self.position[1] - self.box_size[1] // 2),
-                      pt2=(self.position[0] + self.box_size[0] // 2, self.position[1] + self.box_size[1] // 2),
-                      color=self.color,
-                      thickness=-1,
-                      lineType=cv2.LINE_4)
+        if not self.grabbed:
+            cv2.rectangle(src,
+                          pt1=(self.position[0] - self.box_size[0] // 2, self.position[1] - self.box_size[1] // 2),
+                          pt2=(self.position[0] + self.box_size[0] // 2, self.position[1] + self.box_size[1] // 2),
+                          color=self.color,
+                          thickness=-1,
+                          lineType=cv2.LINE_4)
+        else:
+            cv2.rectangle(src,
+                          pt1=(self.position[0] - self.box_size[0] // 2, self.position[1] - self.box_size[1] // 2),
+                          pt2=(self.position[0] + self.box_size[0] // 2, self.position[1] + self.box_size[1] // 2),
+                          color=[c / 2 for c in self.color],
+                          thickness=-1,
+                          lineType=cv2.LINE_4)
 
 
 class Text(Element):
@@ -216,7 +231,7 @@ class Text(Element):
         """
         super().__init__(position=initial_position,
                          color=color,
-                         hit_box_dims=[font_size*len(text)*7, font_size*20],
+                         hit_box_dims=[font_size * len(text) * 7, font_size * 20],
                          can_be_grabbed=can_be_grabbed,
                          deletable=deletable)
         self.text = text
@@ -228,12 +243,20 @@ class Text(Element):
         Shows object on GUI, meant to be used into an update function only.
         :param src: image to be drawn to.
         """
-        cv2.putText(src,
-                    text=self.text,
-                    org=[self.position[0] - self.hit_box[0], self.position[1]],
-                    fontFace=self.font,
-                    fontScale=self.font_size,
-                    color=self.color)
+        if not self.grabbed:
+            cv2.putText(src,
+                        text=self.text,
+                        org=[self.position[0] - self.hit_box[0], self.position[1]],
+                        fontFace=self.font,
+                        fontScale=self.font_size,
+                        color=self.color)
+        else:
+            cv2.putText(src,
+                        text=self.text,
+                        org=[self.position[0] - self.hit_box[0], self.position[1]],
+                        fontFace=self.font,
+                        fontScale=self.font_size * 1.1,
+                        color=[c for c in self.color])
 
 
 if __name__ == '__main__':
