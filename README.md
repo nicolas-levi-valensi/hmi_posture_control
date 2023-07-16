@@ -14,10 +14,10 @@ train those classes and use them to control a demo graphical user interface to i
 ![HMI and cam screenshot](screenshots/HMI_and_cam.png)
 
 ### Default configuration of the controller
-*Closed hand* to grab an object.
-*pinch* to delete object.
-*index up* to create a ball.
-*thumb up* to create a box.
+* <b style="color: darkorange">Closed hand</b> to grab an object.
+* <b style="color: darkgreen">Pinch</b>  to delete object.
+* <b style="color: brown">Index Up</b> to create a ball.
+* <b style="color: mediumpurple">Thumb Up</b> to create a box.
 
 Existing posture classes are present in [Assets/datasets_records](Assets/datasets_records).
 
@@ -33,6 +33,9 @@ Escape key while focused on OpenCV video output window to end the process by def
 * **OpenCV** - low-level image processing and display.
 * **TensorFlow - Keras** - Direct Neural Network for posture prediction.
 * **Tkinter** - User interface for the dataset creation.
+
+# Classes documentations
+
 
 ## HandVideoClassifier Class
 
