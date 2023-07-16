@@ -8,7 +8,7 @@ train those classes and use them to control a demo graphical user interface to i
 2. **train.py** : Model training and visualizer.
    1. `python3 train.py` without arguments to train/re-train the model before visualizing.
    2. `python3 train.py --no_train` argument to avoid training and use visualizer only.
-3. **Controller.py** : Example Human Machine Interface using the pre-trained model and Mediapipe detection.
+3. **HMI_demo.py** : Example Human Machine Interface using the pre-trained model and Mediapipe detection.
 
 #### Screenshot
 ![HMI and cam screenshot](screenshots/HMI_and_cam.png)
