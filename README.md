@@ -10,10 +10,9 @@ train those classes and use them to control a demo graphical user interface to i
    2. `python3 train.py --no_train` argument to avoid training and use visualizer only.
 3. **HMI_demo.py** : Example Human Machine Interface using the pre-trained model and Mediapipe detection.
 
-#### Screenshot
-![HMI and cam screenshot](screenshots/HMI_and_cam.png)
+#### Demonstration Video
 
-https://github.com/nicolas-levi-valensi/hmi_posture_control/blob/main/screenshots/HMI_no_sound.mp4
+[![Demonstration Video](screenshots/Youtube_link_for_git.jpg)](https://www.youtube.com/watch?v=7dhED_lWXfI)
 
 ### Default configuration of the controller
 * <b style="color: darkorange">Closed hand</b> to grab an object.
