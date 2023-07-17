@@ -13,7 +13,7 @@ train those classes and use them to control a demo graphical user interface to i
 #### Screenshot
 ![HMI and cam screenshot](screenshots/HMI_and_cam.png)
 
-https://github.com/nicolas-levi-valensi/hmi_posture_control/assets/108842004/b7c14a6a-e459-45cf-aa99-ca6b5d738aa2
+https://github.com/nicolas-levi-valensi/hmi_posture_control/blob/main/screenshots/HMI_no_sound.mp4
 
 ### Default configuration of the controller
 * <b style="color: darkorange">Closed hand</b> to grab an object.
