@@ -63,7 +63,7 @@ def main():
         model.summary()
 
         model.fit(x=x, y=y,
-                  epochs=20)
+                  epochs=50)
         model.save(model_path)
     else:
         model = models.load_model(model_path)
