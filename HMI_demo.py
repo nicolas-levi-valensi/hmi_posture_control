@@ -3,20 +3,29 @@ import os
 import signal
 import numpy as np
 import cv2
+from colorama import Fore, Style, Back
+from tabulate import tabulate
+
 from nico_lib.hvc_minilib import HandVideoClassifier
 from nico_lib.hmi_minilib import Ball, Box, GUI, Text
 
 # SETTINGS
+SHOW_INFO_AT_STARTUP = True
+
 MODEL_PATH = "Assets/model_data/model.h5"  # TensorFlow Keras model path root
 DATA_PATH = "Assets/datasets_records"  # Optional, the data path is only used to extract the list of labels
-MODEL_OUTPUT_LABELS = [class_file[:-4] for class_file in os.listdir(DATA_PATH)]
+
 USE_VERBOSE_ON_HVC = True  # Enables INFO output from HandVideoClassifier
 VIDEO_OUTPUT = True  # Enables the video output of the camera (optional)
 
-GRAB_INDEX = 0
-ADD_BALL_INDEX = 10
-ADD_BOX_INDEX = 9
-DEL_INDEX = 5
+MODEL_OUTPUT_LABELS = [class_file[:-4] for class_file in os.listdir(DATA_PATH)]
+POSTURE_DICT = dict(zip(MODEL_OUTPUT_LABELS, range(len(MODEL_OUTPUT_LABELS))))
+
+# Use POSTURE_DICT["name_of_the_csv_file"] or the direct output index of the model
+GRAB_INDEX = POSTURE_DICT["closed_hand"]
+ADD_BALL_INDEX = POSTURE_DICT["up"]
+ADD_BOX_INDEX = POSTURE_DICT["thumb_up"]
+DEL_INDEX = POSTURE_DICT["pinch"]
 
 
 def create_base_scene(gui_handler: GUI) -> None:
@@ -143,5 +152,23 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    print(f"INFO: Starting {__file__}")
+    if SHOW_INFO_AT_STARTUP:
+        print("\n")
+        print(Fore.BLUE + Back.WHITE + f"INFO: THIS SCRIPT CAN BE CONFIGURED AT THE BEGINNING OF THE FILE")
+        print(Style.RESET_ALL + "(Config. and classes infos can be disabled by setting SHOW_INFO_AT_STARTUP = False)\n")
+        print(Fore.LIGHTBLUE_EX + "CONFIGURATION :\n\n" +
+              tabulate(tabular_data=[["MODEL_PATH", MODEL_PATH],
+                                     ["DATA_PATH", DATA_PATH],
+                                     ["USE_VERBOSE_ON_HVC", USE_VERBOSE_ON_HVC],
+                                     ["VIDEO_OUTPUT", VIDEO_OUTPUT]],
+                       headers=["PARAMS", "VALUE"],
+                       tablefmt="github",
+                       stralign="left"))
+        print(Style.RESET_ALL)
+        print(Fore.LIGHTBLUE_EX + "\nDETECTED CLASSES :\n\n" +
+              tabulate(tabular_data=zip(POSTURE_DICT.values(), POSTURE_DICT.keys()),
+                       headers=["OUT", "LABEL"],
+                       tablefmt="github",
+                       stralign="left",
+                       numalign="left") + "\n\n")
     main()
