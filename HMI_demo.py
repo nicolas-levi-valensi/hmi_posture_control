@@ -8,11 +8,10 @@ from nico_lib.hmi_minilib import Ball, Box, GUI, Text
 
 # SETTINGS
 MODEL_PATH = "Assets/model_data/model.h5"  # TensorFlow Keras model path root
-DATA_PATH = "Assets/datasets_records"
+DATA_PATH = "Assets/datasets_records"  # Optional, the data path is only used to extract the list of labels
 MODEL_OUTPUT_LABELS = [class_file[:-4] for class_file in os.listdir(DATA_PATH)]
-KEY_PRESS_DELAY = 0.2  # Delay between each press on [up, down, left, right] key
 USE_VERBOSE_ON_HVC = True  # Enables INFO output from HandVideoClassifier
-VIDEO_OUTPUT = True
+VIDEO_OUTPUT = True  # Enables the video output of the camera (optional)
 
 GRAB_INDEX = 0
 ADD_BALL_INDEX = 10
@@ -136,11 +135,13 @@ def main() -> None:
 
         hmi.draw()
         if cv2.waitKey(1) == 27:
-            hvc.stop()
+            if hvc.is_running():  # If ended by Ctrl-C, the process could have stopped the hvc before
+                hvc.stop()
             break
 
     cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
+    print(f"INFO: Starting {__file__}")
     main()

@@ -1,11 +1,13 @@
 from __future__ import annotations
 import os
+import signal
 import time
 from multiprocessing import Process, Value
 import numpy as np
 import cv2
 import mediapipe as mp
 from keras import models
+from halo import Halo
 
 MODEL_PATH = "../Assets/model_data/model.h5"  # TensorFlow Keras model path
 
@@ -60,15 +62,24 @@ class HandVideoClassifier:
         self.__process = Process(target=self._mainloop_subprocess, args=(self.model_path, self.labels))
         self.__process.start()
 
+        spinner = Halo("INFO: Waiting for subprocess to be ready ", placement="right", spinner="dots")
+        if self.__verbose:
+            spinner.start()
+
         while not self.is_running():
             pass
 
         if self.__verbose:
-            print("INFO: Process has started")
+            spinner.stop()
+
+        if self.__verbose:
+            print("INFO: Process has started.")
 
         return self
 
     def _mainloop_subprocess(self, model_path, labels):
+        signal.signal(signal.SIGINT, lambda x, y: 0)
+
         # Hands detection objects
         mp_hands = mp.solutions.hands
         hands = mp_hands.Hands(min_detection_confidence=0.9, max_num_hands=2)
@@ -146,7 +157,8 @@ class HandVideoClassifier:
                         break
 
         self.__stream.release()
-        self.stop()
+        if self.is_running():
+            self.stop()
 
     def get_predictions(self) -> tuple:
         """
@@ -165,6 +177,9 @@ class HandVideoClassifier:
         return [[self.left_center_coords_x.value, self.left_center_coords_y.value],
                 [self.right_center_coords_x.value, self.right_center_coords_y.value]]
 
+    def _set_running(self):
+        self.__running.value = 1
+
     def is_running(self) -> int:
         """
         Returns the running state of the detection process.
@@ -173,29 +188,26 @@ class HandVideoClassifier:
         """
         return self.__running.value == 1  # necessary due to subprocess integer shared values limitations.
 
-    def stop(self):
+    def stop(self, *args):
         """
         Stops the running process.
         """
         if self.__verbose:
-            print("INFO: Shutting down process")
+            print("INFO: Shutting down subprocess ...")
 
-        if not self.is_running():
+        if not self.is_running() and len(args) == 0:
             raise Exception("Cannot stop : no process is running")
 
         self.__running.value = 0
+
+        if self.__verbose:
+            print("INFO: Subprocess terminated.")
 
         if self.__video_output:
             cv2.destroyAllWindows()
 
         if self.__verbose:
             print("INFO: Stream stopped")
-
-        if self.__verbose:
-            print("INFO: Process terminated")
-
-    def _set_running(self):
-        self.__running.value = 1
 
 
 if __name__ == '__main__':
