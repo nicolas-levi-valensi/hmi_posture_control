@@ -9,18 +9,19 @@ from tabulate import tabulate
 from nico_lib.hvc_minilib import HandVideoClassifier
 from nico_lib.hmi_minilib import Ball, Box, GUI, Text
 
-# SETTINGS
+# ------------- EXECUTION SETTINGS -----------
 SHOW_INFO_AT_STARTUP = True
 
 MODEL_PATH = "Assets/model_data/model.h5"  # TensorFlow Keras model path root
-DATA_PATH = "Assets/datasets_records"  # Optional, the data path is only used to extract the list of labels
-
+DATA_PATH = "Assets/datasets_records"  # The data path is used to extract the list of labels
 USE_VERBOSE_ON_HVC = True  # Enables INFO output from HandVideoClassifier
 VIDEO_OUTPUT = True  # Enables the video output of the camera (optional)
 
+# -------------- Data formatting --------------
 MODEL_OUTPUT_LABELS = [class_file[:-4] for class_file in os.listdir(DATA_PATH)]
 POSTURE_DICT = dict(zip(MODEL_OUTPUT_LABELS, range(len(MODEL_OUTPUT_LABELS))))
 
+# -------------- USAGE SETTINGS ---------------
 # Use POSTURE_DICT["name_of_the_csv_file"] or the direct output index of the model
 GRAB_INDEX = POSTURE_DICT["closed_hand"]
 ADD_BALL_INDEX = POSTURE_DICT["up"]
