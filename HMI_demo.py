@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from colorama import Fore, Style, Back
 from tabulate import tabulate
+import tkinter as tk
 
 from nico_lib.hvc_minilib import HandVideoClassifier
 from nico_lib.hmi_minilib import Ball, Box, GUI, Text
@@ -25,7 +26,34 @@ POSTURE_DICT = dict(zip(MODEL_OUTPUT_LABELS, range(len(MODEL_OUTPUT_LABELS))))
 GRAB_INDEX = POSTURE_DICT["closed_hand"]
 ADD_BALL_INDEX = POSTURE_DICT["up"]
 ADD_BOX_INDEX = POSTURE_DICT["thumb_up"]
+ADD_TEXT_INDEX = POSTURE_DICT["rock"]
 DEL_INDEX = POSTURE_DICT["pinch"]
+
+
+def ask_for_text() -> str:
+    def on_submit():
+        nonlocal text_to_add
+        text_to_add = entry.get()
+        if text_to_add is not None or text_to_add != "":
+            popup.destroy()
+        else:
+            print(Fore.RED + "WARNING: No text entered")
+
+    text_to_add = ""
+    popup = tk.Tk()
+    label = tk.Label(master=popup,
+                     text="Enter text to add")
+    entry = tk.Entry(master=popup,
+                     takefocus=True,
+                     width=50)
+    button = tk.Button(master=popup,
+                       text="Submit",
+                       command=on_submit)
+    label.pack()
+    entry.pack()
+    button.pack()
+    popup.mainloop()
+    return text_to_add
 
 
 def create_base_scene(gui_handler: GUI) -> None:
@@ -139,6 +167,11 @@ def main() -> None:
         for state, prev_state, xy in zip(states, prev_states, hands_coords):
             if state == ADD_BOX_INDEX and prev_state != ADD_BOX_INDEX:
                 hmi.add_object(Box(initial_position=xy, box_size=[40, 50], color=np.random.random(size=3)))
+
+        # Adding text on hand position if ADD_TEXT_INDEX state is reached by hand
+        for state, prev_state, xy in zip(states, prev_states, hands_coords):
+            if state == ADD_TEXT_INDEX and prev_state != ADD_TEXT_INDEX:
+                hmi.add_object(Text(initial_position=xy, text=ask_for_text(), color=np.random.random(size=3)))
 
         prev_states = states
 
