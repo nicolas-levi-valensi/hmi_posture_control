@@ -12,21 +12,23 @@ class GUI:
         """
         self.window_name = window_name
         self.objects = []
-        self.hmi_output = np.zeros((480, 640, 3))
+        self.background = np.zeros((480, 640, 3))
+        self.hmi_output = self.background
         self.hand_coords = [[0, 0], [0, 0]]
 
     def draw(self) -> None:
         """
         Output image generation, used to update the scene.
         """
-        self.hmi_output = np.zeros((480, 640, 3))
+        self.hmi_output = self.background.copy()
 
         for obj in self.objects[::-1]:
             obj.draw(self.hmi_output)
 
         self._draw_hands()
 
-        cv2.imshow("HMI", self.hmi_output)
+        cv2.imshow("HMI", cv2.resize(self.hmi_output,
+                                     (self.hmi_output.shape[1] * 2, self.hmi_output.shape[0] * 2)))
 
     def _draw_hands(self) -> None:
         """
@@ -68,25 +70,27 @@ class GUI:
         if self.objects[obj_id].deletable:
             self.objects.pop(obj_id)
 
+    def set_background(self, path: str):
+        self.background = cv2.imread(path) / 255
+
 
 class Element:
     def __init__(self,
+                 master: GUI,
                  position: list | np.ndarray,
                  hit_box_dims: list | tuple = (20, 20),
-                 color: tuple | list | np.ndarray = (1, 1, 1),
                  can_be_grabbed: bool = True,
                  deletable: bool = True) -> None:
         """
         Base class for GUI object, the draw function needs to be implemented in the subclass.
         :param position: initial position of the object on the GUI.
         :param hit_box_dims: [x, y] distance from center.
-        :param color: object color.
         :param can_be_grabbed: condition for the object to be displaced by grabbing it.
         :param deletable: condition for the object to be deleted.
         """
+        self.master = master
         self.hit_box = hit_box_dims
         self.position = position
-        self.color = color
         self.can_by_grabbed = can_be_grabbed
         self.deletable = deletable
         self.grabbed = False
@@ -97,7 +101,12 @@ class Element:
         Overwrites the position of the object.
         :param position: [x, y] coordinates in the GUI.
         """
-        self.position = position
+
+        # Out of range avoidance
+        if position[0] - self.hit_box[0] > 0 and position[1] - self.hit_box[1] > 0 \
+                and position[0] + self.hit_box[0] < self.master.hmi_output.shape[1] \
+                and position[1] + self.hit_box[1] < self.master.hmi_output.shape[0]:
+            self.position = position
 
     def get_position(self) -> list:
         """
@@ -133,6 +142,7 @@ class Element:
 
 class Ball(Element):
     def __init__(self,
+                 master: GUI,
                  initial_position: list | np.ndarray,
                  ball_radius: int = 30,
                  color: tuple | list | np.ndarray = (1, 1, 1),
@@ -146,12 +156,13 @@ class Ball(Element):
         :param can_be_grabbed: condition for the object to be displaced by grabbing it.
         :param deletable: condition for the object to be deleted.
         """
-        super().__init__(position=initial_position,
-                         color=color,
+        super().__init__(master=master,
+                         position=initial_position,
                          hit_box_dims=(ball_radius, ball_radius),
                          can_be_grabbed=can_be_grabbed,
                          deletable=deletable)
         self.ball_radius = ball_radius
+        self.color = color
 
     def draw(self, src) -> None:
         """
@@ -173,7 +184,9 @@ class Ball(Element):
 
 
 class Box(Element):
-    def __init__(self, initial_position: list | np.ndarray,
+    def __init__(self,
+                 master: GUI,
+                 initial_position: list | np.ndarray,
                  box_size: tuple | list | np.ndarray = (100, 40),
                  color: tuple | list | np.ndarray = (1, 1, 1),
                  can_be_grabbed: bool = True,
@@ -186,12 +199,13 @@ class Box(Element):
         :param can_be_grabbed: condition for the object to be displaced by grabbing it.
         :param deletable: condition for the object to be deleted.
         """
-        super().__init__(position=initial_position,
-                         color=color,
+        super().__init__(master=master,
+                         position=initial_position,
                          hit_box_dims=[box_size[0] // 2, box_size[1] // 2],
                          can_be_grabbed=can_be_grabbed,
                          deletable=deletable)
         self.box_size = box_size
+        self.color = color
 
     def draw(self, src) -> None:
         """
@@ -215,7 +229,8 @@ class Box(Element):
 
 
 class Text(Element):
-    def __init__(self, initial_position: list | np.ndarray,
+    def __init__(self,
+                 master: GUI, initial_position: list | np.ndarray,
                  text: str = "Basic text",
                  cv2_font: int = cv2.FONT_HERSHEY_COMPLEX_SMALL,
                  font_size: int | float = 1,
@@ -229,14 +244,15 @@ class Text(Element):
         :param font_size: font size.
         :param color: rectangle color.
         """
-        super().__init__(position=initial_position,
-                         color=color,
+        super().__init__(master=master,
+                         position=initial_position,
                          hit_box_dims=[font_size * len(text) * 7, font_size * 20],
                          can_be_grabbed=can_be_grabbed,
                          deletable=deletable)
         self.text = text
         self.font_size = font_size
         self.font = cv2_font
+        self.color = color
 
     def draw(self, src) -> None:
         """
@@ -257,6 +273,110 @@ class Text(Element):
                         fontFace=self.font,
                         fontScale=self.font_size * 1.1,
                         color=[c for c in self.color])
+
+
+class Image(Element):
+    def __init__(self,
+                 master: GUI,
+                 initial_position: list | np.ndarray,
+                 image: np.ndarray,
+                 image_shape: tuple | list | np.ndarray = (100, 40),
+                 can_be_grabbed: bool = True,
+                 deletable: bool = True) -> None:
+        """
+            Image based on Element class.
+            :param initial_position: initial position of the object on the GUI.
+            :param image_shape: image dimensions.
+            :param can_be_grabbed: condition for the object to be displaced by grabbing it.
+            :param deletable: condition for the object to be deleted.
+            """
+        super().__init__(master=master,
+                         position=initial_position,
+                         hit_box_dims=[image_shape[0] // 2, image_shape[1] // 2],
+                         can_be_grabbed=can_be_grabbed,
+                         deletable=deletable)
+        self.shape = image_shape
+        self.image = cv2.resize(image, self.shape)
+
+    def draw(self, src):
+        """
+        Shows object on GUI, meant to be used into an update function only.
+        :param src: image to be drawn to.
+        """
+        if self.image.shape[2] == 4:
+            for c in range(3):
+                src[self.position[1] - self.shape[1] // 2:self.position[1] - self.shape[1] // 2 + self.shape[1],
+                    self.position[0] - self.shape[0] // 2:self.position[0] - self.shape[0] // 2 + self.shape[0],
+                    c] = \
+                    (self.image[:, :, c] * self.image[:, :, 3] +
+                     (1 - self.image[:, :, 3]) *
+                     src[self.position[1] - self.shape[1] // 2:self.position[1] - self.shape[1] // 2 + self.shape[1],
+                     self.position[0] - self.shape[0] // 2:self.position[0] - self.shape[0] // 2 + self.shape[0],
+                     c])
+        else:
+            src[self.position[1] - self.shape[1] // 2:self.position[1] - self.shape[1] // 2 + self.shape[1],
+                self.position[0] - self.shape[0] // 2:self.position[0] - self.shape[0] // 2 + self.shape[0]] \
+                = self.image
+
+
+class Fish1(Image):
+    def __init__(self,
+                 master: GUI,
+                 initial_position: list | np.ndarray,
+                 can_be_grabbed: bool = True,
+                 deletable: bool = True) -> None:
+        image = cv2.imread("./Assets/sprites/fish_01.png", cv2.IMREAD_UNCHANGED) / 255
+        super().__init__(master=master,
+                         initial_position=initial_position,
+                         image=image,
+                         image_shape=[120, 80],
+                         can_be_grabbed=can_be_grabbed,
+                         deletable=deletable)
+
+
+class Fish2(Image):
+    def __init__(self,
+                 master: GUI,
+                 initial_position: list | np.ndarray,
+                 can_be_grabbed: bool = True,
+                 deletable: bool = True) -> None:
+        image = cv2.imread("./Assets/sprites/fish_02.png", cv2.IMREAD_UNCHANGED) / 255
+        super().__init__(master=master,
+                         initial_position=initial_position,
+                         image=image,
+                         image_shape=[130, 80],
+                         can_be_grabbed=can_be_grabbed,
+                         deletable=deletable)
+
+
+class Shell1(Image):
+    def __init__(self,
+                 master: GUI,
+                 initial_position: list | np.ndarray,
+                 can_be_grabbed: bool = True,
+                 deletable: bool = True) -> None:
+        image = cv2.imread("./Assets/sprites/shell_01.png", cv2.IMREAD_UNCHANGED) / 255
+        super().__init__(master=master,
+                         initial_position=initial_position,
+                         image=image,
+                         image_shape=[100, 90],
+                         can_be_grabbed=can_be_grabbed,
+                         deletable=deletable)
+
+
+class Shell2(Image):
+    def __init__(self,
+                 master: GUI,
+                 initial_position: list | np.ndarray,
+                 can_be_grabbed: bool = True,
+                 deletable: bool = True) -> None:
+        image = cv2.imread("./Assets/sprites/shell_02.png", cv2.IMREAD_UNCHANGED) / 255
+        super().__init__(master=master,
+                         initial_position=initial_position,
+                         image=image,
+                         image_shape=[80, 80],
+                         can_be_grabbed=can_be_grabbed,
+                         deletable=deletable)
 
 
 if __name__ == '__main__':

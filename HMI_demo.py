@@ -7,7 +7,7 @@ from colorama import Fore, Style, Back
 from tabulate import tabulate
 
 from nico_lib.hvc_minilib import HandVideoClassifier
-from nico_lib.hmi_minilib import Ball, Box, GUI, Text
+from nico_lib.hmi_minilib import Ball, Box, GUI, Text, Fish1, Fish2, Shell1, Shell2
 
 # ------------- EXECUTION SETTINGS -----------
 SHOW_INFO_AT_STARTUP = True
@@ -36,56 +36,107 @@ def create_base_scene(gui_handler: GUI) -> None:
     :type gui_handler: GUI
     """
     # Scene initialisation (example)
-    box_0 = Box(initial_position=[200, 200],
+    box_0 = Box(master=gui_handler,
+                initial_position=[200, 200],
                 box_size=[40, 30],
                 color=(0.1, 0.8, 0))
     gui_handler.add_object(box_0)
 
-    box_1 = Box(initial_position=[300, 100],
+    box_1 = Box(master=gui_handler,
+                initial_position=[300, 100],
                 box_size=[80, 60],
                 color=(0, 0.3, 0.7))
     gui_handler.add_object(box_1)
 
-    ball_0 = Ball(initial_position=[400, 400],
+    ball_0 = Ball(master=gui_handler,
+                  initial_position=[400, 400],
                   ball_radius=30,
                   color=(0.1, 0.2, 0.3))
     gui_handler.add_object(ball_0)
 
-    text_0 = Text(initial_position=[300, 60],
+    text_0 = Text(master=gui_handler,
+                  initial_position=[300, 60],
                   text="Deletable text",
                   font_size=1,
                   color=(0.8, 0.2, 0.8),
                   deletable=True)
     gui_handler.add_object(text_0)
 
-    text_1 = Text(initial_position=[200, 360],
+    text_1 = Text(master=gui_handler,
+                  initial_position=[200, 360],
                   text="Not deletable",
                   font_size=1,
                   color=(0.4, 0.2, 0.9),
                   deletable=False)
     gui_handler.add_object(text_1)
 
-    text_2 = Text(initial_position=[130, 40],
+    text_2 = Text(master=gui_handler,
+                  initial_position=[130, 40],
                   text="Pinch to delete",
                   font_size=1,
                   color=(0.9, 0.9, 0.4),
                   deletable=False)
     gui_handler.add_object(text_2)
 
-    text_3 = Text(initial_position=[150, 120],
+    text_3 = Text(master=gui_handler,
+                  initial_position=[150, 120],
                   text="Grab to displace",
                   font_size=1,
                   color=(0.9, 0.5, 0.5),
                   deletable=False)
     gui_handler.add_object(text_3)
 
-    text_4 = Text(initial_position=[350, 220],
+    text_4 = Text(master=gui_handler,
+                  initial_position=[350, 220],
                   text="Fixed text",
                   font_size=1,
                   color=(0.9, 0.5, 0.5),
                   deletable=False,
                   can_be_grabbed=False)
     gui_handler.add_object(text_4)
+
+    fish = Fish1(master=gui_handler,
+                 initial_position=[200, 200],
+                 can_be_grabbed=True,
+                 deletable=False)
+    gui_handler.add_object(fish)
+
+
+def create_fish_scene(gui_handler: GUI) -> None:
+    gui_handler.set_background(path="./Assets/sprites/bg_underwater.jpg")
+
+    gui_handler.add_object(Fish1(master=gui_handler,
+                                 initial_position=[400, 200],
+                                 can_be_grabbed=True,
+                                 deletable=False))
+
+    gui_handler.add_object(Fish1(master=gui_handler,
+                                 initial_position=[500, 270],
+                                 can_be_grabbed=True,
+                                 deletable=False))
+
+    gui_handler.add_object(Fish2(master=gui_handler,
+                                 initial_position=[100, 150],
+                                 can_be_grabbed=True,
+                                 deletable=False))
+
+    gui_handler.add_object(Fish2(master=gui_handler,
+                                 initial_position=[200, 280],
+                                 can_be_grabbed=True,
+                                 deletable=False))
+
+    gui_handler.add_object(Shell1(master=gui_handler,
+                                  initial_position=[190, 420],
+                                  can_be_grabbed=True,
+                                  deletable=False))
+
+    gui_handler.add_object(Shell2(master=gui_handler,
+                                  initial_position=[350, 390],
+                                  can_be_grabbed=True,
+                                  deletable=False))
+
+
+INITIAL_SCENE = create_fish_scene
 
 
 def main() -> None:
@@ -99,7 +150,8 @@ def main() -> None:
     # Ctrl-C handling for clean subprocess shutdown
     signal.signal(signal.SIGINT, hvc.stop)
 
-    create_base_scene(gui_handler=hmi)
+    if INITIAL_SCENE is not None:
+        INITIAL_SCENE(gui_handler=hmi)
 
     prev_states = [-1, -1]  # Stores the previous hand states to detect changes in hands postures
     while hvc.is_running():  # Mainloop tests and actions
@@ -134,12 +186,12 @@ def main() -> None:
         # Adding balls on hand position if ADD_BALL_INDEX state is reached by hand
         for state, prev_state, xy in zip(states, prev_states, hands_coords):
             if state == ADD_BALL_INDEX and prev_state != ADD_BALL_INDEX:
-                hmi.add_object(Ball(initial_position=xy, ball_radius=20, color=np.random.random(size=3)))
+                hmi.add_object(Ball(master=hmi, initial_position=xy, ball_radius=20, color=np.random.random(size=3)))
 
         # Adding boxes on hand position if ADD_BOX_INDEX state is reached by hand
         for state, prev_state, xy in zip(states, prev_states, hands_coords):
             if state == ADD_BOX_INDEX and prev_state != ADD_BOX_INDEX:
-                hmi.add_object(Box(initial_position=xy, box_size=[40, 50], color=np.random.random(size=3)))
+                hmi.add_object(Box(master=hmi, initial_position=xy, box_size=[40, 50], color=np.random.random(size=3)))
 
         prev_states = states
 
