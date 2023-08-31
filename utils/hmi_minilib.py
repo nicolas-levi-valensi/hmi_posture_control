@@ -326,7 +326,8 @@ class Image(Element):
 
 class ImageButton(Image):
     def __init__(self, master: GUI, initial_position: list | np.ndarray, command: Callable,
-                 image: np.ndarray, image_shape: list | np.ndarray, can_be_grabbed: bool = False, deletable: bool = False):
+                 image: np.ndarray, image_shape: list | np.ndarray, can_be_grabbed: bool = False,
+                 deletable: bool = False):
         super().__init__(master=master, initial_position=initial_position, image=image, image_shape=image_shape,
                          can_be_grabbed=can_be_grabbed, deletable=deletable)
         self.command = command

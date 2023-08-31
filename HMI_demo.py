@@ -8,10 +8,11 @@ from tabulate import tabulate
 
 from utils.hvc_minilib import HandVideoClassifier
 from utils.hmi_minilib import GUI
-from scenes.scene_loader import load_scene, menu_behavior
+from scenes.scene_loader import load_scene
 
 # ------------- EXECUTION SETTINGS -----------
 SHOW_INFO_AT_STARTUP = True
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 MODEL_PATH = "Assets/model_data/model.h5"  # TensorFlow Keras model path root
 DATA_PATH = "Assets/datasets_records"  # The data path is used to extract the list of labels
@@ -30,7 +31,7 @@ ADD_OBJ2_IND = POSTURE_DICT["thumb_up"]
 DEL_INDEX = POSTURE_DICT["pinch"]
 CLICK_INDEX = POSTURE_DICT["rock"]
 
-SCENE_TO_LOAD = "menu"
+SCENE_TO_LOAD = "space"
 
 
 def main() -> None:
@@ -46,7 +47,7 @@ def main() -> None:
 
     # TODO: Add menu
 
-    obj1, obj2 = load_scene(SCENE_TO_LOAD, hmi)
+    finger_objects = load_scene(SCENE_TO_LOAD, hmi)
 
     loaded_scene = SCENE_TO_LOAD
     prev_states = [-1, -1]  # Stores the previous hand states to detect changes in hands postures
@@ -88,15 +89,11 @@ def main() -> None:
                         obj.click()
                         break
 
-            # Adding balls on hand position if ADD_OBJ1_IND state is reached by hand
-            for state, prev_state, xy in zip(states, prev_states, hands_coords):
-                if state == ADD_OBJ1_IND and prev_state != ADD_OBJ1_IND:
-                    hmi.add_object(obj1(master=hmi, initial_position=xy))
-
-            # Adding boxes on hand position if ADD_OBJ2_IND state is reached by hand
-            for state, prev_state, xy in zip(states, prev_states, hands_coords):
-                if state == ADD_OBJ2_IND and prev_state != ADD_OBJ2_IND:
-                    hmi.add_object(obj2(master=hmi, initial_position=xy))
+            for posture_ind, obj in zip([ADD_OBJ1_IND, ADD_OBJ2_IND], finger_objects):
+                # Adding OBJ on hand position if ADD_OBJ2_IND state is reached by hand
+                for state, prev_state, xy in zip(states, prev_states, hands_coords):
+                    if state == posture_ind and prev_state != posture_ind:
+                        hmi.add_object(obj(master=hmi, initial_position=xy))
 
             prev_states = states
 
@@ -106,7 +103,7 @@ def main() -> None:
                     hvc.stop()
                 break
         else:
-            obj1, obj2 = load_scene(SCENE_TO_LOAD, hmi)
+            finger_objects = load_scene(SCENE_TO_LOAD, hmi)
 
     cv2.destroyAllWindows()
 
