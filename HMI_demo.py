@@ -18,6 +18,7 @@ MODEL_PATH = "Assets/model_data/model.h5"  # TensorFlow Keras model path root
 DATA_PATH = "Assets/datasets_records"  # The data path is used to extract the list of labels
 USE_VERBOSE_ON_HVC = True  # Enables INFO output from HandVideoClassifier
 VIDEO_OUTPUT = True  # Enables the video output of the camera (optional)
+LABELS_ON_HANDS = False  # Enables labels printing on video output
 
 # -------------- Data formatting --------------
 MODEL_OUTPUT_LABELS = [class_file[:-4] for class_file in os.listdir(DATA_PATH)]
@@ -37,7 +38,8 @@ SCENE_TO_LOAD = "space"
 def main() -> None:
     # Video capture and detection initialisation
     hvc = HandVideoClassifier(model_path=MODEL_PATH, stream_path=0, video_output=VIDEO_OUTPUT,
-                              labels_on_vid=MODEL_OUTPUT_LABELS, verbose=USE_VERBOSE_ON_HVC).start()
+                              labels_on_vid=MODEL_OUTPUT_LABELS, verbose=USE_VERBOSE_ON_HVC,
+                              labels_on_hands=LABELS_ON_HANDS).start()
 
     # Graphic interface initialisation
     hmi = GUI(window_name="Interface")
@@ -81,7 +83,7 @@ def main() -> None:
                         hmi.delete_object(obj_id)
                         break
 
-            # Object deletion
+            # Object click
             for hand_pos, hand_id in zip(hands_coords, range(2)):
                 for obj_id, obj in enumerate(hmi.objects):
                     if (np.less(np.abs(np.subtract(obj.get_position(), hand_pos)), obj.get_hit_box())).all() \
