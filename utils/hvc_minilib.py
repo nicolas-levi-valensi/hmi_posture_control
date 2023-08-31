@@ -19,7 +19,8 @@ class HandVideoClassifier:
                  video_output: bool = False,
                  verbose: bool = False,
                  labels_on_vid: list | np.ndarray = None,
-                 always_on_top: bool = True) -> None:
+                 always_on_top: bool = True,
+                 labels_on_hands: bool = True) -> None:
         """
         Description
 
@@ -34,6 +35,7 @@ class HandVideoClassifier:
         :param verbose: enables verbose mode,
         :param labels_on_vid: list or array of labels to show on video output,
         :param always_on_top: keeps video output in front of other apps.
+        :param labels_on_hands: print current state on both hands.
         """
         self.__process = None
         self.__stream = None
@@ -50,6 +52,7 @@ class HandVideoClassifier:
         self.model_path = model_path
         self.labels = labels_on_vid
         self.always_on_top = always_on_top
+        self.labels_on_hands = labels_on_hands
 
     def start(self) -> "HandVideoClassifier":
         """
@@ -139,7 +142,7 @@ class HandVideoClassifier:
                     self.__prediction_right.value = -1
 
                 if self.__video_output:
-                    if self.labels:
+                    if self.labels_on_hands:
                         if self.__prediction_left.value != -1:
                             cv2.putText(src, self.labels[self.__prediction_left.value],
                                         org=(self.left_center_coords_x.value, self.left_center_coords_y.value),

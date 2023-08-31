@@ -42,7 +42,7 @@ Escape key while focused on OpenCV video output window to end the process by def
 
 ### Class usage
 
-The [HandVideoClassifier (HVC)](nico_lib/hvc_minilib.py) class handles :
+The [HandVideoClassifier (HVC)](utils/hvc_minilib.py) class handles :
 
 1. **Video capture** from camera or source file 
 *(will be updated with video buffering instead of direct output to avoid time differed prediction)*.
@@ -57,7 +57,7 @@ The labels shown on video can be passed in the `labels_on_vid` optional argument
 #### Initialisation
 
 ```python
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hvc_minilib import HandVideoClassifier
 
 hvc = HandVideoClassifier(model_path="Assets/model_data/model.h5",
                           stream_path=0,  # To use camera at port 0 (default)
@@ -70,7 +70,8 @@ hvc = HandVideoClassifier(model_path="Assets/model_data/model.h5",
 #### Process startup
 
 ```python
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hvc_minilib import HandVideoClassifier
+
 hvc = HandVideoClassifier("Assets/model_data/model.h5")
 
 hvc.start()  # Begins acquisition subprocess
@@ -79,7 +80,7 @@ hvc.start()  # Begins acquisition subprocess
 #### Get prediction
 
 ```python
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hvc_minilib import HandVideoClassifier
 
 hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
@@ -89,7 +90,8 @@ prediction = hvc.get_predictions()  # Returns the prediction made on last frame
 #### Get running state
 
 ```python
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hvc_minilib import HandVideoClassifier
+
 hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 state = hvc.is_running()  # Returns the running state of the detection subprocess (bool)
@@ -98,7 +100,8 @@ state = hvc.is_running()  # Returns the running state of the detection subproces
 #### Stop subprocess and release video source
 
 ```python
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hvc_minilib import HandVideoClassifier
+
 hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 hvc.stop()
@@ -107,7 +110,8 @@ hvc.stop()
 #### Attributes
 
 ```python
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hvc_minilib import HandVideoClassifier
+
 hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 labels = hvc.labels  # Retrieve the labels passed in argument
@@ -117,7 +121,8 @@ model_path = hvc.model_path  # Retrieve the model path passed in argument
 #### Get hands location
 
 ```python
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hvc_minilib import HandVideoClassifier
+
 hvc = HandVideoClassifier("Assets/model_data/model.h5").start()
 
 hands_coords = hvc.get__hands_coords()
@@ -130,7 +135,7 @@ hands_coords = hvc.get__hands_coords()
 #### Box, Ball and Text creation
 
 ```python
-from nico_lib.hmi_minilib import Ball, Box, Text
+from utils.hmi_minilib import Ball, Box, Text
 import cv2
 
 box = Box(initial_position=[50, 50],
@@ -157,7 +162,7 @@ text = Text(initial_position=[300, 200],
 #### Set the position of the object on GUI
 
 ```python
-from nico_lib.hmi_minilib import Ball
+from utils.hmi_minilib import Ball
 
 ball = Ball(initial_position=[40, 30])
 
@@ -169,7 +174,7 @@ ball.set_position(position=[20, 10])
 #### Get the position of the object on GUI
 
 ```python
-from nico_lib.hmi_minilib import Box
+from utils.hmi_minilib import Box
 
 box = Box(initial_position=[40, 30])
 
@@ -181,7 +186,7 @@ actual_position = box.get_position()
 #### Set the state of the object to grabbed
 
 ```python
-from nico_lib.hmi_minilib import Text
+from utils.hmi_minilib import Text
 
 text = Text(initial_position=[40, 30])
 
@@ -193,7 +198,7 @@ text.set_grabbed(grabbed=True, holder_index=1)  # holder hand index accessible t
 #### Check the grabbed state of the object
 
 ```python
-from nico_lib.hmi_minilib import Ball
+from utils.hmi_minilib import Ball
 
 ball = Ball(initial_position=[40, 30])
 
@@ -205,7 +210,7 @@ is_grabbed = ball.is_grabbed()
 #### Get hit box (for grab, and delete)
 
 ```python
-from nico_lib.hmi_minilib import Ball
+from utils.hmi_minilib import Ball
 
 ball = Ball(initial_position=[40, 30])
 
@@ -219,7 +224,7 @@ hit_box = ball.get_hit_box()
 #### Initialisation
 
 ```python
-from nico_lib.hmi_minilib import GUI
+from utils.hmi_minilib import GUI
 
 gui = GUI(window_name="Example HMI")
 ```
@@ -227,8 +232,8 @@ gui = GUI(window_name="Example HMI")
 #### Usage in loop with HandVideoClassifier
 
 ```python
-from nico_lib.hmi_minilib import GUI, Box
-from nico_lib.hvc_minilib import HandVideoClassifier
+from utils.hmi_minilib import GUI, Box
+from utils.hvc_minilib import HandVideoClassifier
 import cv2
 
 gui = GUI(window_name="Example HMI")
@@ -241,9 +246,9 @@ while True:
     hands_predictions = hvc.get_predictions()
     hands_positions = hvc.get__hands_coords()
     gui.set_hands_coords(hands_positions)
-   
+
     # ACTIONS ...
-   
+
     gui.draw()
     if cv2.waitKey(1) == 27:  # Escape KeyCode is 27
         break
