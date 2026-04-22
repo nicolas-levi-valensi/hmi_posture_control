@@ -1,5 +1,5 @@
 mediapipe>=0.10.1
-tensorflow>=2.13.0
+tensorflow>=2.21.0
 opencv-python>=4.5.5.64
 keras>=2.13.1
 halo>=0.0.31
